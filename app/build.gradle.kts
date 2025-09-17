@@ -68,8 +68,9 @@ dependencies {
 
 	// Room Database
 	implementation(libs.androidx.room.runtime)
-	implementation(libs.androidx.room.compiler)
+	ksp(libs.androidx.room.compiler)
 	implementation(libs.androidx.room.ktx)
+	testImplementation(libs.androidx.room.testing)
 
 	// Test
 	testImplementation(libs.junit)
