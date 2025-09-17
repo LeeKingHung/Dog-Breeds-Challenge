@@ -67,7 +67,10 @@ dependencies {
 	debugImplementation(libs.androidx.compose.ui.test.manifest)
 	implementation(libs.androidx.activity.compose)
 	implementation(libs.androidx.lifecycle.viewmodel.compose)
+	
+	// Coil
 	implementation(libs.coil.compose)
+	implementation(libs.coil.network.okhttp)
 
 	// Navigation 3
 	implementation(libs.androidx.navigation3.ui)
