@@ -51,7 +51,10 @@ dependencies {
 	implementation(libs.androidx.appcompat)
 	implementation(libs.material)
 	implementation(libs.retrofit)
+
+	// HILT
 	implementation(libs.hilt.android)
+	ksp(libs.hilt.compiler)
 
 	// Jetpack Compose
 	val composeBom = platform(libs.androidx.compose.bom)
@@ -82,7 +85,5 @@ dependencies {
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)
-
-	ksp(libs.hilt.compiler)
 
 }
