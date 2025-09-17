@@ -1,4 +1,5 @@
 plugins {
+	alias(libs.plugins.kotlin.android)
 	alias(libs.plugins.android.application)
 	alias(libs.plugins.ksp)
 	alias(libs.plugins.hilt)
@@ -35,6 +36,10 @@ android {
 
 	buildFeatures {
 		compose = true
+	}
+
+	kotlinOptions {
+		jvmTarget = "11"
 	}
 
 }
