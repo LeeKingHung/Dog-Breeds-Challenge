@@ -8,7 +8,7 @@ import org.junit.Test
 class BreedsJsonDeserializerTest {
 
 	@Test
-	fun addition_isCorrect() {
+	fun test() {
 		val json = RemoteDataSourceUtils.getJsonContentFromFile("Get All Breeds")
 		val typeToken = object : TypeToken<List<String>>() {}
 		val typeAdapter = BreedsJsonDeserializer()
