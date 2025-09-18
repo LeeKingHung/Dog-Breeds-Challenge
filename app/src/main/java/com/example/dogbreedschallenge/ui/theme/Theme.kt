@@ -91,7 +91,7 @@ private val darkScheme = darkColorScheme(
 
 private val LocalDimensions = staticCompositionLocalOf { Dimensions() }
 
-val MaterialTheme.dimens: Dimensions
+@Suppress("UnusedReceiverParameter") val MaterialTheme.dimensions: Dimensions
 	@Composable
 	@ReadOnlyComposable
 	get() = LocalDimensions.current
@@ -99,7 +99,7 @@ val MaterialTheme.dimens: Dimensions
 @Composable
 fun AppTheme(
 	darkTheme: Boolean = isSystemInDarkTheme(),
-	dynamicColor: Boolean = true,
+	dynamicColor: Boolean = false,
 	content: @Composable() () -> Unit
 ) {
 
@@ -117,7 +117,7 @@ fun AppTheme(
 	}
 
 	CompositionLocalProvider(LocalDimensions provides Dimensions()) {
-		MaterialTheme(colorScheme = colorScheme, content = content)
+		MaterialTheme(colorScheme = colorScheme, shapes = Shapes, content = content)
 	}
 
 }
