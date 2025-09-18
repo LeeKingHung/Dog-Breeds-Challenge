@@ -10,6 +10,6 @@ interface ApiService {
 	suspend fun getAllDogs(): Response<List<String>>
 
 	@GET("breed/{breed}/images/random")
-	suspend fun getRandomDogImage(@Path("breed") breed: String): Response<Data<String>>
+	suspend fun getRandomDogImage(@Path("breed",encoded = true) breed: String): Response<Data<String>>
 
 }
