@@ -12,7 +12,8 @@ class RepositoryImpl(private val apiService: ApiService) : Repository {
 	override suspend fun getAllDogs(): Result<List<String>> {
 		return try {
 			val response = apiService.getAllDogs()
-			Result.success(response.body()!!)
+			if (response.isSuccessful) Result.success(response.body()!!)
+			else Result.failure(Exception())
 		} catch (e: Exception) {
 			Log.e(TAG, "", e)
 			Result.failure(e)
@@ -22,7 +23,8 @@ class RepositoryImpl(private val apiService: ApiService) : Repository {
 	override suspend fun getRandomDogImage(breed: String): Result<String> {
 		return try {
 			val response = apiService.getRandomDogImage(breed)
-			Result.success(response.body()!!.data)
+			if (response.isSuccessful) Result.success(response.body()!!.data)
+			else Result.failure(Exception())
 		} catch (e: Exception) {
 			Log.e(TAG, "", e)
 			Result.failure(e)
