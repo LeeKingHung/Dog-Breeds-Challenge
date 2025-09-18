@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.dogbreedschallenge.data.DataUtils
 import com.example.dogbreedschallenge.data.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -34,8 +33,8 @@ class AppViewModel @Inject constructor(private val repository: Repository) : Vie
 
 		_uiStateFlow.update { it.copy(inputsState = LoadingState.Loading) }
 
-		viewModelScope.launch(Dispatchers.IO) {
-
+		viewModelScope.launch {
+			
 			repository.getAllDogs().onSuccess { breeds ->
 				_uiStateFlow.update { it.copy(inputsState = LoadingState.Success(breeds)) }
 				loadNextBreed()
@@ -51,7 +50,7 @@ class AppViewModel @Inject constructor(private val repository: Repository) : Vie
 
 		val inputs = (uiStateFlow.value.inputsState as? LoadingState.Success<List<String>>)?.data ?: return
 		val correctAnswer = inputs.random()
-		
+
 		// Update new answer 
 		// Reset previous user answer
 		// Start to load next random image
@@ -63,10 +62,10 @@ class AppViewModel @Inject constructor(private val repository: Repository) : Vie
 				isAnswerCorrect = null
 			)
 		}
-		
+
 		val breed = DataUtils.getBreedPathForImageLink(correctAnswer)
 
-		viewModelScope.launch(Dispatchers.IO) {
+		viewModelScope.launch{
 
 			repository.getRandomDogImage(breed).onSuccess { link ->
 				_uiStateFlow.update { it.copy(imageUrlState = LoadingState.Success(link)) }
