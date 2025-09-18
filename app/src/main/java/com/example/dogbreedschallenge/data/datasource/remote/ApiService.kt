@@ -7,7 +7,7 @@ import retrofit2.http.Path
 interface ApiService {
 
 	@GET("breeds/list/all")
-	suspend fun getAllDogs(): Response<Data<List<String>>>
+	suspend fun getAllDogs(): Response<List<String>>
 
 	@GET("breed/{breed}/images/random")
 	suspend fun getRandomDogImage(@Path("breed") breed: String): Response<Data<String>>
