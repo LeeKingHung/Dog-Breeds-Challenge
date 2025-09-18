@@ -19,6 +19,7 @@
 	<!-- region Content Descriptions -->
 	<string name = "content_description_info">Info</string>
 	<string name = "content_description_picture">Picture</string>
+	<string name = "content_description_unable_to_load_picture">Unable to load picture</string>
 	<string name = "content_description_select_from_list">Select From List</string>
 	<!-- endregion -->
 

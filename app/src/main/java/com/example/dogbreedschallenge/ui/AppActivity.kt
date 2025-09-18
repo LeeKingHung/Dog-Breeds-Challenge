@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -50,13 +52,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import com.example.dogbreedschallenge.R
 import com.example.dogbreedschallenge.ui.theme.AppTheme
 import com.example.dogbreedschallenge.ui.theme.dimensions
@@ -141,7 +141,7 @@ private fun ColumnScope.LoadingUi() {
 
 	// Empty Space
 	Spacer(modifier = Modifier.weight(1f))
-	
+
 }
 
 @Composable
@@ -201,28 +201,13 @@ private fun ColumnScope.Content(uiState: UiState,
 	Instruction()
 
 	// Dog Picture
-	// TODO: 18/9/2025 reduce placeholder size, loading progress bar
-	var isImageLoaded by remember { mutableStateOf(false) }
-	val placeholder = rememberVectorPainter(Icons.Filled.Warning)
-	val colorFilter = if (!isImageLoaded) ColorFilter.tint(MaterialTheme.colorScheme.primary) else null
-	AsyncImage(
-		model = "https://images.dog.ceo/breeds/dalmatian/cooper1.jpg",
-		modifier = Modifier.fillMaxWidth()
-			.clip(MaterialTheme.shapes.medium)
-			.background(color = MaterialTheme.colorScheme.primaryContainer),
-		placeholder = placeholder,
-		error = placeholder,
-		fallback = placeholder,
-		contentDescription = stringResource(R.string.content_description_picture),
-		colorFilter = colorFilter,
-		onSuccess = { isImageLoaded = true },
-	)
+	Image(uiState = uiState)
 
 	// Question
 	Text(stringResource(R.string.question))
 
 	// Answer
-	Input(value = uiState.answer, list = inputs, onValueChange = onAnswerChanged)
+	Input(value = uiState.userAnswer, list = inputs, onValueChange = onAnswerChanged)
 
 	// Empty Space
 	Spacer(modifier = Modifier.weight(1f))
@@ -233,11 +218,53 @@ private fun ColumnScope.Content(uiState: UiState,
 		modifier = Modifier.fillMaxWidth(),
 		shape = MaterialTheme.shapes.medium,
 		colors = ButtonDefaults.elevatedButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-		enabled = uiState.answer.isNotEmpty()
+		enabled = uiState.userAnswer.isNotEmpty()
 	) {
 		Text(stringResource(R.string.check_answer))
 	}
 
+}
+
+@Composable
+private fun ColumnScope.Image(uiState: UiState) {
+
+	when (uiState.imageUrlState) {
+
+		is LoadingState.Success<*> -> SubcomposeAsyncImage(
+			model = uiState.imageUrlState.data,
+			contentDescription = stringResource(R.string.content_description_picture),
+			modifier = Modifier
+				.align(Alignment.CenterHorizontally)
+				.clip(MaterialTheme.shapes.medium),
+			loading = { ImageLoadingIndicator() },
+			error = { ImageLoadingError() }
+		)
+
+		is LoadingState.Error -> ImageLoadingError(modifier = Modifier.align(Alignment.CenterHorizontally))
+
+		else -> ImageLoadingIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+
+	}
+
+}
+
+@Composable
+private fun ImageLoadingIndicator(modifier: Modifier = Modifier) {
+	CircularProgressIndicator(modifier = modifier.size(MaterialTheme.dimensions.extraLarge))
+}
+
+@Composable
+private fun ImageLoadingError(modifier: Modifier = Modifier) {
+	Icon(
+		Icons.Filled.Warning,
+		modifier = modifier
+			.fillMaxWidth()
+			.height(MaterialTheme.dimensions.extraLarge)
+			.clip(MaterialTheme.shapes.medium)
+			.background(color = MaterialTheme.colorScheme.secondaryContainer)
+			.padding(MaterialTheme.dimensions.medium),
+		contentDescription = stringResource(R.string.content_description_unable_to_load_picture)
+	)
 }
 
 @Composable
@@ -403,9 +430,19 @@ private fun PreviewError() = AppTheme {
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewLoading() = AppTheme {
+private fun PreviewInitialLoading() = AppTheme {
 	Root(
 		uiState = UiState(inputsState = LoadingState.Loading),
+		onRetryLoadingList = {},
+		onAnswerChanged = {},
+		onCheckAnswer = {})
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewImageLoading() = AppTheme {
+	Root(
+		uiState = UiState(imageUrlState = LoadingState.Loading, inputsState = LoadingState.Success(emptyList())),
 		onRetryLoadingList = {},
 		onAnswerChanged = {},
 		onCheckAnswer = {})
