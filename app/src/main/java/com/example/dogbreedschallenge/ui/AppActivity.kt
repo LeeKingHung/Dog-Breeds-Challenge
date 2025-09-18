@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.dogbreedschallenge.ui
 
 import android.graphics.Color
@@ -6,9 +8,58 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import coil3.compose.AsyncImage
+import com.example.dogbreedschallenge.R
 import com.example.dogbreedschallenge.ui.theme.AppTheme
+import com.example.dogbreedschallenge.ui.theme.dimensions
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class AppActivity : AppCompatActivity() {
@@ -24,7 +75,12 @@ class AppActivity : AppCompatActivity() {
 		setContent {
 
 			AppTheme {
-				RootContent()
+				val viewModel = hiltViewModel<AppViewModel>()
+				val uiState by viewModel.uiStateFlow.collectAsState()
+				RootContent(
+					uiState,
+					onAnswerChanged = { viewModel.updateAnswer(it) },
+					onCheckAnswer = { viewModel.checkAnswer() })
 			}
 
 		}
@@ -34,6 +90,224 @@ class AppActivity : AppCompatActivity() {
 }
 
 @Composable
-private fun RootContent() {
+private fun RootContent(uiState: UiState, onAnswerChanged: (String) -> Unit, onCheckAnswer: () -> Unit) {
+
+	Column(
+		modifier = Modifier.fillMaxSize()
+			.background(color = MaterialTheme.colorScheme.background)
+			.safeContentPadding()
+			.padding(MaterialTheme.dimensions.medium),
+		verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimensions.medium)
+	) {
+
+		// Title
+		Text(
+			stringResource(R.string.app_name),
+			style = MaterialTheme.typography.headlineLarge,
+			color = MaterialTheme.colorScheme.primary
+		)
+
+		// Instruction
+		Instruction()
+
+		// Dog Picture
+		// TODO: 18/9/2025 reduce placeholder size, loading progress bar
+		var isImageLoaded by remember { mutableStateOf(false) }
+		val placeholder = rememberVectorPainter(Icons.Filled.Warning)
+		val colorFilter = if (!isImageLoaded) ColorFilter.tint(MaterialTheme.colorScheme.primary) else null
+		AsyncImage(
+			model = "https://images.dog.ceo/breeds/dalmatian/cooper1.jpg",
+			modifier = Modifier.fillMaxWidth()
+				.clip(MaterialTheme.shapes.medium)
+				.background(color = MaterialTheme.colorScheme.primaryContainer),
+			placeholder = placeholder,
+			error = placeholder,
+			fallback = placeholder,
+			contentDescription = stringResource(R.string.content_description_picture),
+			colorFilter = colorFilter,
+			onSuccess = { isImageLoaded = true },
+		)
+
+		// Question
+		Text(stringResource(R.string.question))
+
+		// Answer
+		Input(value = uiState.answer, list = uiState.inputs, onValueChange = onAnswerChanged)
+
+		// Empty Space
+		Spacer(modifier = Modifier.weight(1f))
+
+		// Confirm Button
+		ElevatedButton(
+			onClick = onCheckAnswer,
+			modifier = Modifier.fillMaxWidth(),
+			shape = MaterialTheme.shapes.medium,
+			colors = ButtonDefaults.elevatedButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+			enabled = uiState.answer.isNotEmpty()
+		) {
+			Text(stringResource(R.string.check_answer))
+		}
+
+	}
 
 }
+
+@Composable
+private fun Instruction() {
+
+	Card(
+		modifier = Modifier.fillMaxWidth(),
+		colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+	) {
+
+		Row(
+			modifier = Modifier.fillMaxWidth().padding(MaterialTheme.dimensions.small),
+			horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimensions.small),
+			verticalAlignment = Alignment.CenterVertically
+		) {
+
+			Icon(
+				imageVector = Icons.Filled.Info,
+				contentDescription = stringResource(R.string.content_description_info)
+			)
+
+			Text(
+				stringResource(R.string.instruction),
+				style = MaterialTheme.typography.bodyMedium
+			)
+
+		}
+
+	}
+
+}
+
+@Composable
+private fun Input(list: List<String>, value: String, onValueChange: (String) -> Unit) {
+
+	var isShowingBottomSheet by remember { mutableStateOf(false) }
+
+	// Bottom Sheet
+	if (isShowingBottomSheet) {
+
+		AnswerSelectionBottomSheet(
+			list = list,
+			onSelected = { onValueChange(it) },
+			onDismissRequest = { isShowingBottomSheet = false }
+		)
+
+	}
+
+	// Text Field	
+	val leadingIcon = @Composable {
+
+		IconButton(onClick = { isShowingBottomSheet = true }) {
+			Icon(
+				imageVector = Icons.Filled.Edit,
+				contentDescription = stringResource(R.string.content_description_select_from_list)
+			)
+		}
+
+	}
+	val placeholder = @Composable { Text(stringResource(R.string.placeholder_input)) }
+	OutlinedTextField(
+		value = value,
+		onValueChange = onValueChange,
+		modifier = Modifier.fillMaxWidth(),
+		readOnly = true,
+		shape = MaterialTheme.shapes.medium,
+		placeholder = placeholder,
+		leadingIcon = leadingIcon
+	)
+
+}
+
+@Composable
+private fun AnswerSelectionBottomSheet(list: List<String>,
+                                       sheetState: SheetState = rememberModalBottomSheetState(),
+                                       onSelected: (String) -> Unit,
+                                       onDismissRequest: () -> Unit) {
+
+	val scope = rememberCoroutineScope()
+	var searchText by remember { mutableStateOf("") }
+	val filteredList = list.filter { it.contains(searchText, ignoreCase = false) }
+
+	ModalBottomSheet(onDismissRequest = onDismissRequest, sheetState = sheetState) {
+
+		Column(
+			modifier = Modifier.fillMaxWidth().padding(MaterialTheme.dimensions.medium),
+			verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimensions.medium)
+		) {
+
+			// Search 
+			val leadingIcon = @Composable {
+				Icon(
+					imageVector = Icons.Filled.Search,
+					contentDescription = stringResource(R.string.search)
+				)
+			}
+			OutlinedTextField(
+				value = searchText,
+				onValueChange = { searchText = it },
+				modifier = Modifier.fillMaxWidth(),
+				placeholder = { Text(stringResource(R.string.search)) },
+				shape = MaterialTheme.shapes.medium,
+				leadingIcon = leadingIcon
+			)
+
+			// List
+			LazyColumn(
+				modifier = Modifier.fillMaxWidth(),
+				verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimensions.extraSmall)
+			) {
+
+				items(filteredList) {
+
+					val onClick: () -> Unit = {
+
+						onSelected(it)
+						searchText = ""
+
+						scope.launch { sheetState.hide() }.invokeOnCompletion {
+							if (!sheetState.isVisible) onDismissRequest()
+						}
+
+					}
+
+					Card(
+						colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+						shape = MaterialTheme.shapes.small,
+						modifier = Modifier.fillMaxWidth(),
+						onClick = onClick
+					) {
+						Text(it, modifier = Modifier.padding(MaterialTheme.dimensions.small))
+					}
+
+				}
+
+			}
+
+		}
+
+	}
+
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewRoot() = AppTheme {
+	RootContent(uiState = UiState(), onAnswerChanged = {}, onCheckAnswer = {})
+}
+
+@Preview
+@Composable
+private fun PreviewAnswerSelectionBottomSheet() = AppTheme {
+
+	AnswerSelectionBottomSheet(
+		list = listOf("Affenpinscher", "African", "Airedale"),
+		sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current, initialValue = SheetValue.Expanded),
+		onSelected = {},
+		onDismissRequest = {}
+	)
+
+} 
