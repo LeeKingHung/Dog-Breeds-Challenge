@@ -2,7 +2,8 @@ package com.example.dogbreedschallenge.ui
 
 data class UiState(
 	val inputsState: LoadingState<List<String>>,
-	val answer: String = "",
+	val userAnswer: String = "",
+	val correctAnswer: String = "",
 	val isAnswerCorrect: Boolean? = null
 )
 
