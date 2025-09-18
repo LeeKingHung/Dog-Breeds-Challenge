@@ -402,7 +402,7 @@ private fun AnswerSelectionBottomSheet(list: List<String>,
 	val scope = rememberCoroutineScope()
 	var searchText by remember { mutableStateOf("") }
 	val formattedList = list.map { it.capitalize() }
-	val filteredList = formattedList.filter { it.contains(searchText, ignoreCase = false) }
+	val filteredList = formattedList.filter { it.contains(searchText, ignoreCase = true) }
 
 	ModalBottomSheet(onDismissRequest = onDismissRequest, sheetState = sheetState) {
 
