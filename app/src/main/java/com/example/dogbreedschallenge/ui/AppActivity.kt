@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
@@ -53,6 +55,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -107,7 +110,8 @@ private fun Root(uiState: UiState,
 		modifier = Modifier.fillMaxSize()
 			.background(color = MaterialTheme.colorScheme.background)
 			.safeContentPadding()
-			.padding(MaterialTheme.dimensions.medium),
+			.padding(horizontal = MaterialTheme.dimensions.medium)
+			.padding(top = MaterialTheme.dimensions.medium),
 		verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimensions.medium)
 	) {
 
@@ -200,45 +204,52 @@ private fun ColumnScope.ErrorMessage(onRetry: () -> Unit) {
 }
 
 @Composable
-private fun ColumnScope.Content(uiState: UiState,
-                                onAnswerChanged: (String) -> Unit,
-                                onCheckAnswer: () -> Unit,
-                                onNext: () -> Unit) {
+private fun Content(uiState: UiState,
+                    onAnswerChanged: (String) -> Unit,
+                    onCheckAnswer: () -> Unit,
+                    onNext: () -> Unit) {
 
-	// Instruction
-	Instruction()
-
-	// Dog Picture
-	Image(uiState = uiState)
-
-	// Question
-	Text(stringResource(R.string.question))
-
-	// Answer
-	Input(uiState = uiState, onValueChange = onAnswerChanged)
-
-	// Empty Space
-	Spacer(modifier = Modifier.weight(1f))
-
-	// Confirm Button
-	ElevatedButton(
-		onClick = onCheckAnswer,
-		modifier = Modifier.fillMaxWidth(),
-		shape = MaterialTheme.shapes.medium,
-		colors = ButtonDefaults.elevatedButtonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-		enabled = uiState.userAnswer.isNotEmpty()
+	Column(
+		modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = MaterialTheme.dimensions.medium),
+		verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimensions.medium)
 	) {
-		Text(stringResource(R.string.check_answer))
-	}
 
-	// Next Button
-	ElevatedButton(
-		onClick = onNext,
-		modifier = Modifier.fillMaxWidth(),
-		shape = MaterialTheme.shapes.medium,
-		colors = ButtonDefaults.elevatedButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-	) {
-		Text(stringResource(R.string.next_picture))
+		// Instruction
+		Instruction()
+
+		// Dog Picture
+		Image(uiState = uiState)
+
+		// Question
+		Text(stringResource(R.string.question))
+
+		// Answer
+		Input(uiState = uiState, onValueChange = onAnswerChanged)
+
+		// Empty Space
+		Spacer(modifier = Modifier.weight(1f))
+
+		// Confirm Button
+		ElevatedButton(
+			onClick = onCheckAnswer,
+			modifier = Modifier.fillMaxWidth(),
+			shape = MaterialTheme.shapes.medium,
+			colors = ButtonDefaults.elevatedButtonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+			enabled = uiState.userAnswer.isNotEmpty()
+		) {
+			Text(stringResource(R.string.check_answer))
+		}
+
+		// Next Button
+		ElevatedButton(
+			onClick = onNext,
+			modifier = Modifier.fillMaxWidth(),
+			shape = MaterialTheme.shapes.medium,
+			colors = ButtonDefaults.elevatedButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+		) {
+			Text(stringResource(R.string.next_picture))
+		}
+
 	}
 
 }
@@ -254,8 +265,8 @@ private fun ColumnScope.Image(uiState: UiState) {
 			contentDescription = stringResource(R.string.content_description_picture),
 			modifier = Modifier
 				.fillMaxWidth()
-				.align(Alignment.CenterHorizontally)
 				.clip(MaterialTheme.shapes.medium),
+			contentScale = ContentScale.FillWidth,
 
 			loading = {
 
@@ -351,7 +362,7 @@ private fun Input(uiState: UiState, onValueChange: (String) -> Unit) {
 	}
 
 	// Text Field ====================================================== 
-	
+
 	val leadingIcon = @Composable {
 
 		IconButton(onClick = { isShowingBottomSheet = true }) {
