@@ -1,5 +1,8 @@
 package com.example.dogbreedschallenge.ui
 
+/**
+ * @param isAnswerCorrect if null -> no checking yet
+ */
 data class UiState(
 	val inputsState: LoadingState<List<String>> = LoadingState.None,
 	val imageUrlState: LoadingState<String> = LoadingState.None,

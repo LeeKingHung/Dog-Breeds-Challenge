@@ -8,13 +8,9 @@
 	<string name = "placeholder_input">Select an answer</string>
 	<string name = "search">Search</string>
 	<string name = "check_answer">Check Answer</string>
-	<string-array name = "correct_responses">
-		<item>Exactly!</item>
-		<item>Correct!</item>
-		<item>That\'s right!</item>
-		<item>You got it!</item>
-	</string-array>
+	<string name = "next_picture">Next Picture</string>
 	<string name = "incorrect_response">Oops! Not this time. Let\'s try another one!</string>
+	<string name = "correct_response">Brilliant! That\'s the correct answer.</string>
 
 	<!-- region Content Descriptions -->
 	<string name = "content_description_info">Info</string>

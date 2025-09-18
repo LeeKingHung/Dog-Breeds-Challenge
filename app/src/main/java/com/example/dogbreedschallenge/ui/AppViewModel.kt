@@ -27,7 +27,7 @@ class AppViewModel @Inject constructor(private val repository: Repository) : Vie
 	}
 
 	fun checkAnswer() {
-
+		_uiStateFlow.update { it.copy(isAnswerCorrect = it.userAnswer.equals(it.correctAnswer, ignoreCase = true)) }
 	}
 
 	fun loadAllBreeds() {
@@ -47,11 +47,18 @@ class AppViewModel @Inject constructor(private val repository: Repository) : Vie
 
 	}
 
-	private fun loadNextBreed() {
+	fun loadNextBreed() {
 
 		val inputs = (uiStateFlow.value.inputsState as? LoadingState.Success<List<String>>)?.data ?: return
 		val correctAnswer = inputs.random()
-		_uiStateFlow.update { it.copy(correctAnswer = correctAnswer, userAnswer = "", imageUrlState = LoadingState.Loading) }
+		_uiStateFlow.update {
+			it.copy(
+				correctAnswer = correctAnswer,
+				userAnswer = "",
+				imageUrlState = LoadingState.Loading,
+				isAnswerCorrect = null
+			)
+		}
 		val breed = DataUtils.getBreedPathForImageLink(correctAnswer)
 
 		viewModelScope.launch(Dispatchers.IO) {

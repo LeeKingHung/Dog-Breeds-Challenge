@@ -61,6 +61,7 @@ import coil3.compose.SubcomposeAsyncImage
 import com.example.dogbreedschallenge.R
 import com.example.dogbreedschallenge.ui.theme.AppTheme
 import com.example.dogbreedschallenge.ui.theme.dimensions
+import com.example.dogbreedschallenge.utils.capitalize
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -84,7 +85,9 @@ class AppActivity : AppCompatActivity() {
 					uiState,
 					onRetryLoadingList = { viewModel.loadAllBreeds() },
 					onAnswerChanged = { viewModel.updateAnswer(it) },
-					onCheckAnswer = { viewModel.checkAnswer() })
+					onCheckAnswer = { viewModel.checkAnswer() },
+					onNext = { viewModel.loadNextBreed() }
+				)
 			}
 
 		}
@@ -94,7 +97,11 @@ class AppActivity : AppCompatActivity() {
 }
 
 @Composable
-private fun Root(uiState: UiState, onRetryLoadingList: () -> Unit, onAnswerChanged: (String) -> Unit, onCheckAnswer: () -> Unit) {
+private fun Root(uiState: UiState,
+                 onRetryLoadingList: () -> Unit,
+                 onAnswerChanged: (String) -> Unit,
+                 onCheckAnswer: () -> Unit,
+                 onNext: () -> Unit) {
 
 	Column(
 		modifier = Modifier.fillMaxSize()
@@ -115,9 +122,9 @@ private fun Root(uiState: UiState, onRetryLoadingList: () -> Unit, onAnswerChang
 
 			is LoadingState.Success -> Content(
 				uiState = uiState,
-				inputs = uiState.inputsState.data,
 				onAnswerChanged = onAnswerChanged,
-				onCheckAnswer = onCheckAnswer
+				onCheckAnswer = onCheckAnswer,
+				onNext = onNext
 			)
 
 			is LoadingState.Error -> ErrorMessage(onRetry = onRetryLoadingList)
@@ -194,9 +201,9 @@ private fun ColumnScope.ErrorMessage(onRetry: () -> Unit) {
 
 @Composable
 private fun ColumnScope.Content(uiState: UiState,
-                                inputs: List<String>,
                                 onAnswerChanged: (String) -> Unit,
-                                onCheckAnswer: () -> Unit) {
+                                onCheckAnswer: () -> Unit,
+                                onNext: () -> Unit) {
 
 	// Instruction
 	Instruction()
@@ -208,7 +215,7 @@ private fun ColumnScope.Content(uiState: UiState,
 	Text(stringResource(R.string.question))
 
 	// Answer
-	Input(value = uiState.userAnswer, list = inputs, onValueChange = onAnswerChanged)
+	Input(uiState = uiState, onValueChange = onAnswerChanged)
 
 	// Empty Space
 	Spacer(modifier = Modifier.weight(1f))
@@ -218,10 +225,20 @@ private fun ColumnScope.Content(uiState: UiState,
 		onClick = onCheckAnswer,
 		modifier = Modifier.fillMaxWidth(),
 		shape = MaterialTheme.shapes.medium,
-		colors = ButtonDefaults.elevatedButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+		colors = ButtonDefaults.elevatedButtonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
 		enabled = uiState.userAnswer.isNotEmpty()
 	) {
 		Text(stringResource(R.string.check_answer))
+	}
+
+	// Next Button
+	ElevatedButton(
+		onClick = onNext,
+		modifier = Modifier.fillMaxWidth(),
+		shape = MaterialTheme.shapes.medium,
+		colors = ButtonDefaults.elevatedButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+	) {
+		Text(stringResource(R.string.next_picture))
 	}
 
 }
@@ -241,12 +258,12 @@ private fun ColumnScope.Image(uiState: UiState) {
 				.clip(MaterialTheme.shapes.medium),
 
 			loading = {
-				
+
 				// Wrapped by Box to apply alignment.
 				Box(contentAlignment = Alignment.Center) {
 					ImageLoadingIndicator()
 				}
-				
+
 			},
 
 			error = {
@@ -255,7 +272,7 @@ private fun ColumnScope.Image(uiState: UiState) {
 				Box(contentAlignment = Alignment.Center) {
 					ImageLoadingError()
 				}
-				
+
 			}
 
 		)
@@ -318,19 +335,19 @@ private fun Instruction() {
 }
 
 @Composable
-private fun Input(list: List<String>, value: String, onValueChange: (String) -> Unit) {
+private fun Input(uiState: UiState, onValueChange: (String) -> Unit) {
 
 	var isShowingBottomSheet by remember { mutableStateOf(false) }
+	val isAnswerCorrect = uiState.isAnswerCorrect
 
 	// Bottom Sheet
 	if (isShowingBottomSheet) {
-
+		val list = (uiState.inputsState as LoadingState.Success<List<String>>).data
 		AnswerSelectionBottomSheet(
 			list = list,
 			onSelected = { onValueChange(it) },
 			onDismissRequest = { isShowingBottomSheet = false }
 		)
-
 	}
 
 	// Text Field	
@@ -344,15 +361,34 @@ private fun Input(list: List<String>, value: String, onValueChange: (String) -> 
 		}
 
 	}
-	val placeholder = @Composable { Text(stringResource(R.string.placeholder_input)) }
+
+	val placeholder = @Composable {
+		Text(stringResource(R.string.placeholder_input))
+	}
+
+	val supportingText = if (isAnswerCorrect == null) {
+
+		null
+
+	} else {
+
+		@Composable {
+			val resource = if (isAnswerCorrect) R.string.correct_response else R.string.incorrect_response
+			Text(stringResource(resource))
+		}
+
+	}
+
 	OutlinedTextField(
-		value = value,
+		value = uiState.userAnswer,
 		onValueChange = onValueChange,
 		modifier = Modifier.fillMaxWidth(),
 		readOnly = true,
 		shape = MaterialTheme.shapes.medium,
 		placeholder = placeholder,
-		leadingIcon = leadingIcon
+		leadingIcon = leadingIcon,
+		supportingText = supportingText,
+		isError = isAnswerCorrect == false
 	)
 
 }
@@ -365,7 +401,8 @@ private fun AnswerSelectionBottomSheet(list: List<String>,
 
 	val scope = rememberCoroutineScope()
 	var searchText by remember { mutableStateOf("") }
-	val filteredList = list.filter { it.contains(searchText, ignoreCase = false) }
+	val formattedList = list.map { it.capitalize() }
+	val filteredList = formattedList.filter { it.contains(searchText, ignoreCase = false) }
 
 	ModalBottomSheet(onDismissRequest = onDismissRequest, sheetState = sheetState) {
 
@@ -435,7 +472,8 @@ private fun PreviewDefault() = AppTheme {
 		uiState = UiState(inputsState = LoadingState.Success(listOf("Affenpinscher", "African", "Airedale"))),
 		onRetryLoadingList = {},
 		onAnswerChanged = {},
-		onCheckAnswer = {})
+		onCheckAnswer = {},
+		onNext = {})
 }
 
 @Preview(showBackground = true)
@@ -445,7 +483,8 @@ private fun PreviewError() = AppTheme {
 		uiState = UiState(inputsState = LoadingState.Error),
 		onRetryLoadingList = {},
 		onAnswerChanged = {},
-		onCheckAnswer = {})
+		onCheckAnswer = {},
+		onNext = {})
 }
 
 @Preview(showBackground = true)
@@ -455,7 +494,8 @@ private fun PreviewInitialLoading() = AppTheme {
 		uiState = UiState(inputsState = LoadingState.Loading),
 		onRetryLoadingList = {},
 		onAnswerChanged = {},
-		onCheckAnswer = {})
+		onCheckAnswer = {},
+		onNext = {})
 }
 
 @Preview(showBackground = true)
@@ -465,7 +505,8 @@ private fun PreviewImageLoadingError() = AppTheme {
 		uiState = UiState(imageUrlState = LoadingState.Error, inputsState = LoadingState.Success(emptyList())),
 		onRetryLoadingList = {},
 		onAnswerChanged = {},
-		onCheckAnswer = {})
+		onCheckAnswer = {},
+		onNext = {})
 }
 
 @Preview
@@ -473,7 +514,7 @@ private fun PreviewImageLoadingError() = AppTheme {
 private fun PreviewAnswerSelectionBottomSheet() = AppTheme {
 
 	AnswerSelectionBottomSheet(
-		list = listOf("Affenpinscher", "African", "Airedale"),
+		list = listOf("affenpinscher", "african", "airedale"),
 		sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current, initialValue = SheetValue.Expanded),
 		onSelected = {},
 		onDismissRequest = {}
