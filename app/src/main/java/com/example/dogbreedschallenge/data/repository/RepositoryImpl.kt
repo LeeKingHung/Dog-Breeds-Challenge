@@ -1,13 +1,8 @@
 package com.example.dogbreedschallenge.data.repository
 
-import android.util.Log
 import com.example.dogbreedschallenge.data.datasource.remote.ApiService
 
 class RepositoryImpl(private val apiService: ApiService) : Repository {
-
-	companion object {
-		const val TAG = "Repository"
-	}
 
 	override suspend fun getAllDogs(): Result<List<String>> {
 		return try {
@@ -15,7 +10,6 @@ class RepositoryImpl(private val apiService: ApiService) : Repository {
 			if (response.isSuccessful) Result.success(response.body()!!)
 			else Result.failure(Exception())
 		} catch (e: Exception) {
-			Log.e(TAG, "", e)
 			Result.failure(e)
 		}
 	}
@@ -26,7 +20,6 @@ class RepositoryImpl(private val apiService: ApiService) : Repository {
 			if (response.isSuccessful) Result.success(response.body()!!.data)
 			else Result.failure(Exception())
 		} catch (e: Exception) {
-			Log.e(TAG, "", e)
 			Result.failure(e)
 		}
 	}
