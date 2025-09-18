@@ -51,6 +51,7 @@ class ApiServiceTest {
 
 	@Test
 	fun getAllDogs() = runTest {
+		
 		val jsonBody = RemoteDataSourceUtils.getJsonContentFromFile("Get All Breeds")
 		mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody(jsonBody))
 		val response = apiService.getAllDogs()
@@ -66,10 +67,12 @@ class ApiServiceTest {
 			"indian bakharwal",
 			"akita"
 		)
+		
 	}
 
 	@Test
 	fun getRandomDogImage() = runTest {
+		
 		val jsonBody = RemoteDataSourceUtils.getJsonContentFromFile("Random Breed Image")
 		mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody(jsonBody))
 		val response = apiService.getRandomDogImage("")
@@ -81,6 +84,7 @@ class ApiServiceTest {
 			response.body(),
 			Data("https://images.dog.ceo/breeds/australian-kelpie/Resized_20200303_233358_108952253645051.jpg")
 		)
+		
 	}
 
 }
