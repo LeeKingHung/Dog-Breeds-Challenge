@@ -59,6 +59,7 @@ dependencies {
 	// HILT
 	implementation(libs.hilt.android)
 	implementation(libs.androidx.hilt.navigation.compose)
+	implementation(libs.logging.interceptor)
 	ksp(libs.hilt.compiler)
 
 	// Jetpack Compose
