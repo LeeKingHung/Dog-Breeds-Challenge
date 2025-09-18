@@ -241,15 +241,21 @@ private fun ColumnScope.Image(uiState: UiState) {
 				.clip(MaterialTheme.shapes.medium),
 
 			loading = {
+				
+				// Wrapped by Box to apply alignment.
 				Box(contentAlignment = Alignment.Center) {
 					ImageLoadingIndicator()
 				}
+				
 			},
 
 			error = {
+
+				// Wrapped by Box to apply alignment.
 				Box(contentAlignment = Alignment.Center) {
 					ImageLoadingError()
 				}
+				
 			}
 
 		)
