@@ -60,7 +60,6 @@ dependencies {
 	implementation(libs.hilt.android)
 	implementation(libs.androidx.hilt.navigation.compose)
 	implementation(libs.logging.interceptor)
-	testImplementation(libs.kotlinx.coroutines.test)
 	ksp(libs.hilt.compiler)
 
 	// Jetpack Compose
@@ -97,5 +96,7 @@ dependencies {
 	androidTestImplementation(libs.androidx.espresso.core)
 	testImplementation(libs.truth)
 	testImplementation(libs.mockk)
+	testImplementation(libs.mockwebserver)
+	testImplementation(libs.kotlinx.coroutines.test)
 
 }
