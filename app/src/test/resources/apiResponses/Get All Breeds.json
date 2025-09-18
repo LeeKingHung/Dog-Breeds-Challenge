@@ -1,0 +1,14 @@
+{
+	"message": {
+		"affenpinscher": [],
+		"akita": [],
+		"australian": [
+		  "kelpie",
+		  "shepherd"
+		],
+		"bakharwal": [
+		  "indian"
+		]
+	},
+	"status": "success"
+}
