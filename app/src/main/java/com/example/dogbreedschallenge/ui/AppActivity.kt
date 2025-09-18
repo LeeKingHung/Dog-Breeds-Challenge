@@ -10,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -231,13 +232,26 @@ private fun ColumnScope.Image(uiState: UiState) {
 	when (uiState.imageUrlState) {
 
 		is LoadingState.Success<*> -> SubcomposeAsyncImage(
+
 			model = uiState.imageUrlState.data,
 			contentDescription = stringResource(R.string.content_description_picture),
 			modifier = Modifier
+				.fillMaxWidth()
 				.align(Alignment.CenterHorizontally)
 				.clip(MaterialTheme.shapes.medium),
-			loading = { ImageLoadingIndicator() },
-			error = { ImageLoadingError() }
+
+			loading = {
+				Box(contentAlignment = Alignment.Center) {
+					ImageLoadingIndicator()
+				}
+			},
+
+			error = {
+				Box(contentAlignment = Alignment.Center) {
+					ImageLoadingError()
+				}
+			}
+
 		)
 
 		is LoadingState.Error -> ImageLoadingError(modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -440,9 +454,9 @@ private fun PreviewInitialLoading() = AppTheme {
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewImageLoading() = AppTheme {
+private fun PreviewImageLoadingError() = AppTheme {
 	Root(
-		uiState = UiState(imageUrlState = LoadingState.Loading, inputsState = LoadingState.Success(emptyList())),
+		uiState = UiState(imageUrlState = LoadingState.Error, inputsState = LoadingState.Success(emptyList())),
 		onRetryLoadingList = {},
 		onAnswerChanged = {},
 		onCheckAnswer = {})
