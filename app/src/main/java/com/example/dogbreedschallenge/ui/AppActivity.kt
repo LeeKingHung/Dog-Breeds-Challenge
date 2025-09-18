@@ -122,6 +122,7 @@ private fun Root(uiState: UiState,
 			color = MaterialTheme.colorScheme.primary
 		)
 
+		// Show content according to inputs data loading result.
 		when (uiState.inputsState) {
 
 			is LoadingState.Success -> Content(
@@ -257,6 +258,7 @@ private fun Content(uiState: UiState,
 @Composable
 private fun ColumnScope.Image(uiState: UiState) {
 
+	// Show content according to the image URL fetching result.
 	when (uiState.imageUrlState) {
 
 		is LoadingState.Success<*> -> SubcomposeAsyncImage(
@@ -385,7 +387,8 @@ private fun Input(uiState: UiState, onValueChange: (String) -> Unit) {
 	} else {
 
 		@Composable {
-			val resource = if (isAnswerCorrect) R.string.correct_response else R.string.incorrect_response
+			val resource = if (isAnswerCorrect) R.string.correct_response 
+			else R.string.incorrect_response
 			Text(stringResource(resource))
 		}
 
@@ -479,6 +482,9 @@ private fun AnswerSelectionBottomSheet(list: List<String>,
 
 }
 
+// region Preview    
+// =============================================================================================================
+
 @Preview(showBackground = true)
 @Composable
 private fun PreviewDefault() = AppTheme {
@@ -534,4 +540,6 @@ private fun PreviewAnswerSelectionBottomSheet() = AppTheme {
 		onDismissRequest = {}
 	)
 
-} 
+}
+
+// endregion ===================================================================================================

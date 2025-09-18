@@ -5,6 +5,30 @@ import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import java.lang.reflect.Type
 
+/**
+ * Convert the response like
+ * ```
+ * {
+ *     "message": {
+ *         "affenpinscher": [],
+ *         "akita": [],
+ *         "australian": [
+ *             "kelpie",
+ *             "shepherd"
+ *         ],
+ *         "bakharwal": [
+ *             "indian"
+ *         ],
+ *
+ *     },
+ *     "status": "success"
+ * }
+ * ```
+ * to string list
+ * ```
+ * ["affenpinscher", "akita", "kelpie australian", "shepherd australian", "indian bakharwal"]
+ * ```
+ */
 class BreedsJsonDeserializer : JsonDeserializer<List<String>> {
 
 	override fun deserialize(json: JsonElement,

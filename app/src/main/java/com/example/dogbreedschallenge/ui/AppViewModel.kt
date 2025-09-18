@@ -51,6 +51,10 @@ class AppViewModel @Inject constructor(private val repository: Repository) : Vie
 
 		val inputs = (uiStateFlow.value.inputsState as? LoadingState.Success<List<String>>)?.data ?: return
 		val correctAnswer = inputs.random()
+		
+		// Update new answer 
+		// Reset previous user answer
+		// Start to load next random image
 		_uiStateFlow.update {
 			it.copy(
 				correctAnswer = correctAnswer,
@@ -59,6 +63,7 @@ class AppViewModel @Inject constructor(private val repository: Repository) : Vie
 				isAnswerCorrect = null
 			)
 		}
+		
 		val breed = DataUtils.getBreedPathForImageLink(correctAnswer)
 
 		viewModelScope.launch(Dispatchers.IO) {
