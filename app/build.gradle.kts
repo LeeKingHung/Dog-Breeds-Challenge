@@ -51,7 +51,10 @@ dependencies {
 	implementation(libs.androidx.appcompat)
 	implementation(libs.material)
 	implementation(libs.retrofit)
+	
+	// GSON
 	implementation(libs.converter.gson)
+	implementation(libs.gson)
 
 	// HILT
 	implementation(libs.hilt.android)
