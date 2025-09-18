@@ -60,6 +60,7 @@ dependencies {
 	implementation(libs.hilt.android)
 	implementation(libs.androidx.hilt.navigation.compose)
 	implementation(libs.logging.interceptor)
+	testImplementation(libs.kotlinx.coroutines.test)
 	ksp(libs.hilt.compiler)
 
 	// Jetpack Compose
