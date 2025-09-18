@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +28,7 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -77,8 +79,9 @@ class AppActivity : AppCompatActivity() {
 			AppTheme {
 				val viewModel = hiltViewModel<AppViewModel>()
 				val uiState by viewModel.uiStateFlow.collectAsState()
-				RootContent(
+				Root(
 					uiState,
+					onRetryLoadingList = { viewModel.loadAllBreeds() },
 					onAnswerChanged = { viewModel.updateAnswer(it) },
 					onCheckAnswer = { viewModel.checkAnswer() })
 			}
@@ -90,7 +93,7 @@ class AppActivity : AppCompatActivity() {
 }
 
 @Composable
-private fun RootContent(uiState: UiState, onAnswerChanged: (String) -> Unit, onCheckAnswer: () -> Unit) {
+private fun Root(uiState: UiState, onRetryLoadingList: () -> Unit, onAnswerChanged: (String) -> Unit, onCheckAnswer: () -> Unit) {
 
 	Column(
 		modifier = Modifier.fillMaxSize()
@@ -107,47 +110,132 @@ private fun RootContent(uiState: UiState, onAnswerChanged: (String) -> Unit, onC
 			color = MaterialTheme.colorScheme.primary
 		)
 
-		// Instruction
-		Instruction()
+		when (uiState.inputsState) {
 
-		// Dog Picture
-		// TODO: 18/9/2025 reduce placeholder size, loading progress bar
-		var isImageLoaded by remember { mutableStateOf(false) }
-		val placeholder = rememberVectorPainter(Icons.Filled.Warning)
-		val colorFilter = if (!isImageLoaded) ColorFilter.tint(MaterialTheme.colorScheme.primary) else null
-		AsyncImage(
-			model = "https://images.dog.ceo/breeds/dalmatian/cooper1.jpg",
-			modifier = Modifier.fillMaxWidth()
-				.clip(MaterialTheme.shapes.medium)
-				.background(color = MaterialTheme.colorScheme.primaryContainer),
-			placeholder = placeholder,
-			error = placeholder,
-			fallback = placeholder,
-			contentDescription = stringResource(R.string.content_description_picture),
-			colorFilter = colorFilter,
-			onSuccess = { isImageLoaded = true },
-		)
+			is LoadingState.Success -> Content(
+				uiState = uiState,
+				inputs = uiState.inputsState.data,
+				onAnswerChanged = onAnswerChanged,
+				onCheckAnswer = onCheckAnswer
+			)
 
-		// Question
-		Text(stringResource(R.string.question))
+			is LoadingState.Error -> ErrorMessage(onRetry = onRetryLoadingList)
 
-		// Answer
-		Input(value = uiState.answer, list = uiState.inputs, onValueChange = onAnswerChanged)
+			// None/Loading
+			else -> LoadingUi()
 
-		// Empty Space
-		Spacer(modifier = Modifier.weight(1f))
-
-		// Confirm Button
-		ElevatedButton(
-			onClick = onCheckAnswer,
-			modifier = Modifier.fillMaxWidth(),
-			shape = MaterialTheme.shapes.medium,
-			colors = ButtonDefaults.elevatedButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-			enabled = uiState.answer.isNotEmpty()
-		) {
-			Text(stringResource(R.string.check_answer))
 		}
 
+	}
+
+}
+
+@Composable
+private fun ColumnScope.LoadingUi() {
+
+	// Empty Space
+	Spacer(modifier = Modifier.weight(1f))
+
+	// Loading Icon
+	CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+
+	// Empty Space
+	Spacer(modifier = Modifier.weight(1f))
+	
+}
+
+@Composable
+private fun ColumnScope.ErrorMessage(onRetry: () -> Unit) {
+
+	// Error Text
+	Card(
+		modifier = Modifier.fillMaxWidth(),
+		colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+	) {
+
+		Row(
+			modifier = Modifier.fillMaxWidth().padding(MaterialTheme.dimensions.small),
+			horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimensions.small),
+			verticalAlignment = Alignment.CenterVertically
+		) {
+
+			Icon(
+				imageVector = Icons.Filled.Warning,
+				contentDescription = stringResource(R.string.content_description_info)
+			)
+
+			Text(
+				stringResource(R.string.error),
+				style = MaterialTheme.typography.bodyMedium
+			)
+
+		}
+
+	}
+
+	// Empty Space
+	Spacer(modifier = Modifier.weight(1f))
+
+	// Retry Button
+	ElevatedButton(
+		onClick = onRetry,
+		modifier = Modifier.fillMaxWidth(),
+		shape = MaterialTheme.shapes.medium,
+		colors = ButtonDefaults.elevatedButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+	) {
+		Text(stringResource(R.string.retry))
+	}
+
+	// Empty Space
+	Spacer(modifier = Modifier.weight(1f))
+
+}
+
+@Composable
+private fun ColumnScope.Content(uiState: UiState,
+                                inputs: List<String>,
+                                onAnswerChanged: (String) -> Unit,
+                                onCheckAnswer: () -> Unit) {
+
+	// Instruction
+	Instruction()
+
+	// Dog Picture
+	// TODO: 18/9/2025 reduce placeholder size, loading progress bar
+	var isImageLoaded by remember { mutableStateOf(false) }
+	val placeholder = rememberVectorPainter(Icons.Filled.Warning)
+	val colorFilter = if (!isImageLoaded) ColorFilter.tint(MaterialTheme.colorScheme.primary) else null
+	AsyncImage(
+		model = "https://images.dog.ceo/breeds/dalmatian/cooper1.jpg",
+		modifier = Modifier.fillMaxWidth()
+			.clip(MaterialTheme.shapes.medium)
+			.background(color = MaterialTheme.colorScheme.primaryContainer),
+		placeholder = placeholder,
+		error = placeholder,
+		fallback = placeholder,
+		contentDescription = stringResource(R.string.content_description_picture),
+		colorFilter = colorFilter,
+		onSuccess = { isImageLoaded = true },
+	)
+
+	// Question
+	Text(stringResource(R.string.question))
+
+	// Answer
+	Input(value = uiState.answer, list = inputs, onValueChange = onAnswerChanged)
+
+	// Empty Space
+	Spacer(modifier = Modifier.weight(1f))
+
+	// Confirm Button
+	ElevatedButton(
+		onClick = onCheckAnswer,
+		modifier = Modifier.fillMaxWidth(),
+		shape = MaterialTheme.shapes.medium,
+		colors = ButtonDefaults.elevatedButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+		enabled = uiState.answer.isNotEmpty()
+	) {
+		Text(stringResource(R.string.check_answer))
 	}
 
 }
@@ -295,8 +383,32 @@ private fun AnswerSelectionBottomSheet(list: List<String>,
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewRoot() = AppTheme {
-	RootContent(uiState = UiState(), onAnswerChanged = {}, onCheckAnswer = {})
+private fun PreviewDefault() = AppTheme {
+	Root(
+		uiState = UiState(inputsState = LoadingState.Success(listOf("Affenpinscher", "African", "Airedale"))),
+		onRetryLoadingList = {},
+		onAnswerChanged = {},
+		onCheckAnswer = {})
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewError() = AppTheme {
+	Root(
+		uiState = UiState(inputsState = LoadingState.Error),
+		onRetryLoadingList = {},
+		onAnswerChanged = {},
+		onCheckAnswer = {})
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewLoading() = AppTheme {
+	Root(
+		uiState = UiState(inputsState = LoadingState.Loading),
+		onRetryLoadingList = {},
+		onAnswerChanged = {},
+		onCheckAnswer = {})
 }
 
 @Preview

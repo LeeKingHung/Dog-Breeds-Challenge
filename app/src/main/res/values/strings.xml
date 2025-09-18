@@ -1,7 +1,9 @@
 <resources>
-	
+
 	<string name = "app_name">Dog Breeds Challenge</string>
 	<string name = "instruction">Guess the breed of the dog shown in the picture.</string>
+	<string name = "error">Unable to retrieve data.</string>
+	<string name = "retry">Retry</string>
 	<string name = "question">What is the breed of the dog?</string>
 	<string name = "placeholder_input">Select an answer</string>
 	<string name = "search">Search</string>
@@ -13,11 +15,11 @@
 		<item>You got it!</item>
 	</string-array>
 	<string name = "incorrect_response">Oops! Not this time. Let\'s try another one!</string>
-	
+
 	<!-- region Content Descriptions -->
 	<string name = "content_description_info">Info</string>
 	<string name = "content_description_picture">Picture</string>
 	<string name = "content_description_select_from_list">Select From List</string>
 	<!-- endregion -->
-	
+
 </resources>
