@@ -50,16 +50,16 @@ dependencies {
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.appcompat)
 	implementation(libs.material)
-	implementation(libs.retrofit)
 	
-	// GSON
+	// REST API
+	implementation(libs.retrofit)
 	implementation(libs.converter.gson)
 	implementation(libs.gson)
+	implementation(libs.logging.interceptor)
 
 	// HILT
 	implementation(libs.hilt.android)
 	implementation(libs.androidx.hilt.navigation.compose)
-	implementation(libs.logging.interceptor)
 	ksp(libs.hilt.compiler)
 
 	// Jetpack Compose
