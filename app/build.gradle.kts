@@ -92,12 +92,14 @@ dependencies {
 
 	// Test
 	testImplementation(libs.junit)
-	androidTestImplementation(libs.androidx.junit)
-	androidTestImplementation(libs.androidx.espresso.core)
 	testImplementation(libs.truth)
 	testImplementation(libs.mockk)
 	testImplementation(libs.mockwebserver)
 	testImplementation(libs.kotlinx.coroutines.test)
 	testImplementation(libs.turbine)
+
+	// UI Test
+	androidTestImplementation(libs.androidx.junit)
+	androidTestImplementation(libs.androidx.espresso.core)
 
 }
