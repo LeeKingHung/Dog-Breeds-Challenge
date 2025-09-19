@@ -33,7 +33,7 @@ class RepositoryImplTest {
 		coEvery { apiService.getAllDogs() } returns Response.success(mockValue)
 		val result = repository.getAllDogs()
 		assertTrue(result.isSuccess)
-		assertEquals(result.getOrNull(), mockValue)
+		assertEquals(mockValue, result.getOrNull())
 	}
 
 	@Test
@@ -42,7 +42,7 @@ class RepositoryImplTest {
 		coEvery { apiService.getAllDogs() } throws mockException
 		val result = repository.getAllDogs()
 		assertTrue(result.isFailure)
-		assertEquals(result.exceptionOrNull(), mockException)
+		assertEquals(mockException, result.exceptionOrNull())
 	}
 
 	@Test
@@ -51,7 +51,7 @@ class RepositoryImplTest {
 		coEvery { apiService.getRandomDogImage(TEST_BREED) } returns Response.success(Data(mockValue))
 		val result = repository.getRandomDogImage(TEST_BREED)
 		assertTrue(result.isSuccess)
-		assertEquals(result.getOrNull(), mockValue)
+		assertEquals(mockValue, result.getOrNull())
 	}
 
 	@Test
@@ -60,7 +60,7 @@ class RepositoryImplTest {
 		coEvery { apiService.getRandomDogImage(TEST_BREED) } throws mockException
 		val result = repository.getRandomDogImage(TEST_BREED)
 		assertTrue(result.isFailure)
-		assertEquals(result.exceptionOrNull(), mockException)
+		assertEquals(mockException, result.exceptionOrNull())
 	}
 
 }

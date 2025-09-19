@@ -7,8 +7,8 @@ class DataUtilsTest {
 	
 	@Test
 	fun getBreedPathForImageLink() {
-		assertEquals(DataUtils.getBreedPathForImageLink("abc"), "abc")
-		assertEquals(DataUtils.getBreedPathForImageLink("sub main"), "main/sub")
+		assertEquals("abc", DataUtils.getBreedPathForImageLink("abc"))
+		assertEquals("main/sub", DataUtils.getBreedPathForImageLink("sub main"))
 	}
 
 }

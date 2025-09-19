@@ -58,7 +58,7 @@ import org.junit.Test
 	}
 
 	@Test
-	fun checkAnswer() = runTest {		
+	fun checkAnswer() = runTest {
 		val answer = viewModel.uiStateFlow.first().correctAnswer
 		viewModel.updateAnswer(answer)
 		viewModel.checkAnswer()
@@ -82,7 +82,7 @@ import org.junit.Test
 			// Loaded state
 			val loadedState = awaitItem().inputsState
 			assertTrue(loadedState is LoadingState.Success)
-			assertEquals((loadedState as LoadingState.Success).data, MOCK_BREEDS)
+			assertEquals(MOCK_BREEDS, (loadedState as LoadingState.Success).data)
 			coVerify(exactly = 1) { viewModel.loadNextBreed() }
 			cancelAndIgnoreRemainingEvents()
 
@@ -122,7 +122,7 @@ import org.junit.Test
 		coEvery { repository.getRandomDogImage("a") } returns expectedResult
 		coEvery { repository.getRandomDogImage("b") } returns expectedResult
 		coEvery { repository.getRandomDogImage("c") } returns expectedResult
-		
+
 		viewModel.loadNextBreed()
 
 		viewModel.uiStateFlow.test {
@@ -133,7 +133,7 @@ import org.junit.Test
 			// Loaded state
 			val loadedState = awaitItem().imageUrlState
 			assertTrue(loadedState is LoadingState.Success)
-			assertEquals((loadedState as LoadingState.Success).data, expectedData)
+			assertEquals(expectedData, (loadedState as LoadingState.Success).data)
 
 		}
 

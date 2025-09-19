@@ -80,9 +80,9 @@ class ApiServiceTest {
 		// Assertions
 		assertEquals(200, response.code())
 		assertTrue(response.isSuccessful)
-		assertEquals(
-			response.body(),
-			Data("https://images.dog.ceo/breeds/australian-kelpie/Resized_20200303_233358_108952253645051.jpg")
+		assertEquals(			
+			Data("https://images.dog.ceo/breeds/australian-kelpie/Resized_20200303_233358_108952253645051.jpg"),
+			response.body()
 		)
 		
 	}

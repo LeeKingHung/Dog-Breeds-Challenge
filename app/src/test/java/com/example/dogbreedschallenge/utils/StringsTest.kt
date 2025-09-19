@@ -4,13 +4,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class StringsTest {
-	
+
 	@Test
 	fun capitalize() {
-		assertEquals("abc".capitalize() , "Abc")
-		assertEquals("a".capitalize() , "A")
-		assertEquals("abc def".capitalize() , "Abc def")
-		assertEquals("".capitalize() , "")
+		assertEquals("Abc", "abc".capitalize())
+		assertEquals("A", "a".capitalize())
+		assertEquals("Abc def", "abc def".capitalize())
+		assertEquals("", "".capitalize())
 	}
 
 }
